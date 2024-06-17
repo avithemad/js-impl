@@ -1,0 +1,13 @@
+{
+    "key": "val",
+    "key2": "val2",
+    "key3": 123,
+    "key4": {
+        "newobj": "hello there",
+        "ob": {
+            "num": 1234,
+            "str": "sdfsd",
+            "ne": [12, 32, "df", ["anotherone"], { "key": "val" }]
+        }
+    }
+}
