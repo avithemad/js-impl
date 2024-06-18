@@ -190,6 +190,7 @@ public:
 struct NodeAst
 {
 	virtual void print(int level) = 0;
+	virtual void prettyPrint(int level) = 0;
 	std::vector<NodeAst *> children;
 	virtual ~NodeAst() = default;
 };
@@ -223,6 +224,15 @@ struct ValAst : NodeAst
 			obj->print(t + 1);
 		}
 	}
+	void prettyPrint(int level)
+	{
+		if (type == string)
+			std::cout << "\"" << stringval << "\"";
+		else if (type == number)
+			std::cout << numval;
+		else if (type == lobj || type == larr)
+			obj->prettyPrint(level + 1);
+	}
 };
 struct ArrayAst : NodeAst
 {
@@ -235,6 +245,26 @@ struct ArrayAst : NodeAst
 		std::cout << "ArrayAst |" << '\n';
 		for (auto e : elems)
 			e->print(t + 1);
+	}
+	void prettyPrint(int level)
+	{
+		std::cout << "[\n";
+		int i = 0;
+		for (auto e : elems)
+		{
+			int t = level;
+			while (t-- > 0)
+				std::cout << "  ";
+			e->prettyPrint(level + 1);
+			if (i < elems.size() - 1)
+				std::cout << ",";
+			std::cout << '\n';
+			i++;
+		}
+		int t = level;
+		while (t-- > 0)
+			std::cout << "  ";
+		std::cout << ']';
 	}
 };
 struct KeyValAst : NodeAst
@@ -250,6 +280,14 @@ struct KeyValAst : NodeAst
 		std::cout << "KeyValAst | " << key << '\n';
 		value->print(t + 1);
 	}
+	void prettyPrint(int level)
+	{
+		int t = level;
+		while (level-- > 0)
+			std::cout << "  ";
+		std::cout << "\"" << key << "\": ";
+		value->prettyPrint(t);
+	}
 };
 struct ObjAst : NodeAst
 {
@@ -262,6 +300,24 @@ struct ObjAst : NodeAst
 		std::cout << "ObjAst | " << '\n';
 		for (auto e : keyVals)
 			e->print(t + 1);
+	}
+	void prettyPrint(int level)
+	{
+		std::cout << "{\n";
+		int i = 0;
+		for (auto e : keyVals)
+		{
+			e->prettyPrint(level + 1);
+			if (i < keyVals.size() - 1)
+			{
+				std::cout << ",";
+			}
+			std::cout << "\n";
+			i++;
+		}
+		while (level-- > 0)
+			std::cout << "  ";
+		std::cout << "}";
 	}
 };
 
@@ -415,7 +471,7 @@ int main()
 	ObjAst *res = parseObject(lexer);
 	if (res != nullptr)
 	{
-		res->print(0);
+		res->prettyPrint(0);
 		printf("Parsed successfuly!\n");
 	}
 	else
